@@ -11,7 +11,7 @@ const orderRoute = require('./routes/order');
 const stripeRoute = require('./routes/stripe');
 const cors = require('cors');
 
-mongoose.connect(
+mongoose.connect( 
     process.env.mongo_url
 )
 .then(()=>console.log("dbconnection successfull"))

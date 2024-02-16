@@ -1,10 +1,10 @@
 import React from 'react'
 import styled from "styled-components";
-import { popularProducts } from "../data";
 import Product from "./Product";
 import { useState } from 'react';
 import { useEffect } from 'react';
-import axios from 'axios';
+import { publicRequest } from '../requestMethods';
+import { useLocation } from 'react-router-dom';
 
 const Container = styled.div`
   padding: 20px;
@@ -23,88 +23,157 @@ const Button = styled.button`
     font-weight: 600;
 `;
 
-export default function Products({ cat, filters, sort, query }) {
+export default function Products({ cat, filters, sort }) {
 
   const [products, setProducts] = useState([]);
   const [filterProducts, setFilterProducts] = useState([]);
   const [page, setPage] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
+  const [query1, setQuery1] = useState("");
+  const [st, setSt] = useState(false);
+  const location = useLocation();
 
-  const handlePrev = ()=>{
-    setPage(Math.max(1, page-1));
+  const handlePrev = () => {
+    setPage(Math.max(1, page - 1));
+    // console.log("hello1");
   }
 
-  const handleNext = ()=>{
-    setPage(page+1);
+  const handleNext = () => {
+    setPage(page + 1);
+    console.log(totalProducts);
     // console.log(page);  //here logging the old value shows async nature of react state updation
   }
 
-  useEffect(()=>{
-    const total = async () => {
-      try{
-        const res = await axios.get("http://localhost:5000/api/products/total");
-        setTotalProducts(res.data);
-      }catch(err){
-      }
+  //getting searched products
+  useEffect(() => {
+    if (location.state) {
+      setQuery1(location.state.searchQuery);
     }
-    total();
-  })
+  }, [location.state]);
+
+  useEffect(() => {
+    if (query1) {
+      // console.log(query1);
+      const searchedProducts = async () => {
+        try {
+          const res = await publicRequest.get(`/products/search?query2=${query1}`);
+          setFilterProducts(res.data);
+        } catch (err) {
+          console.log(err);
+        }
+      }
+      searchedProducts();
+    }
+  }, [query1]);
 
   useEffect(() => {
     const getProducts = async () => {
       try {
-        const res = await axios.get(
-          cat
-            ? `http://localhost:5000/api/products?category=${cat}&?page=${page}`
-            : `http://localhost:5000/api/products?page=${page}`);
-        setProducts(res.data);
-        setFilterProducts(res.data);
+        const filterQuery = JSON.stringify(filters);
+        const res = await publicRequest.get(`/products?category=${cat}&page=${page}&filters=${filterQuery}&sort=${sort}`);
+        if((JSON.stringify(filters)!=(JSON.stringify({}))&&filters)||sort||cat) {
+          setFilterProducts(res.data.product1);
+          setTotalProducts(totalProducts+res.data.product1.length);
+        }
+        else {
+          setProducts(res.data.product1);
+          setTotalProducts(totalProducts+res.data.product1.length);
+        }
+        console.log(res.data);
       } catch (err) {
+        console.log(err);
       }
     };
     getProducts();
-  }, [cat, page]);
+  }, [page, st],);
 
-  useEffect(() => {
-    cat && setFilterProducts(
-      products.filter(item =>
-        Object.entries(filters).every(([key, value]) =>
-          item[key].includes(value)
-        )
-      )
-    );
-  }, [filters]);
+  //Note - I have not combined sort, filter and category so you cannot
+  //apply all these filters together, i mean you can set but response
+  //will be illogical
+  //so in below useEffect pass cat as a dependency and remove useEffects
+  //for filter and sort just pass these var in cat useEffect
 
-  useEffect(() => {
-    // console.log(sort);
-    console.log(filterProducts);
-    if (sort == "newest") {
-      setFilterProducts((prev) =>
-        [...prev].sort((a, b) => b.createdAt - a.createdAt)
-      );
+  useEffect(()=>{
+    if((JSON.stringify(filters)!=(JSON.stringify({}))&&filters)||sort||cat){
+      setPage(1);
+      setSt(!st);
     }
-    else if (sort == "asc") {
-      setFilterProducts((prev) =>
-        [...prev].sort((a, b) => a.price - b.price)
-      );
+  }, [cat, filters, sort])
+
+  /*useEffect(() => {
+
+    if (filters && JSON.stringify(filters)!=(JSON.stringify({}))) {
+      const applyfilter = async () => {
+        try {
+          // console.log(filters);
+          const filterQuery = JSON.stringify(filters);
+          const res = await publicRequest.get(`products/?filters=${filterQuery}&page=${page}`);
+          setFilterProducts(res.data.product1);
+          setTotalProducts(res.data.total);
+          // console.log(res.data);
+        } catch (err) {
+          console.log(err);
+        }
+      }
+      applyfilter();
     }
-    else {
-      setFilterProducts((prev) =>
-        [...prev].sort((a, b) => b.price - a.price)
-      );
+
+    // frontend filtering
+    // cat && setFilterProducts(
+    // products.filter(item =>
+    //   Object.entries(filters).every(([key, value]) =>
+    //     item[key].includes(value)
+    //   )
+    // )
+    // );
+  }, [page, st]);*/
+
+  /*useEffect(() => {
+
+    if (sort) {
+      const applysort = async () => {
+        try {
+          const res = await publicRequest.get(`products/?sort=${sort}&page=${page}`);
+          setFilterProducts(res.data.product1);
+          setTotalProducts(res.data.total);
+          console.log(res.data);
+        } catch (err) {
+          console.log(err);
+        }
+      }
+      applysort();
     }
-    console.log(filterProducts);
-  }, [sort])
+
+
+
+    // frontend sorting
+    // if (sort == "newest") {
+    //   setFilterProducts((prev) =>
+    //     [...prev].sort((a, b) => b.createdAt - a.createdAt)
+    //   );
+    // }
+    // else if (sort == "asc") {
+    //   setFilterProducts((prev) =>
+    //     [...prev].sort((a, b) => a.price - b.price)
+    //   );
+    // }
+    // else {
+    //   setFilterProducts((prev) =>
+    //     [...prev].sort((a, b) => b.price - a.price)
+    //   );
+    // }
+
+  }, [page, st])*/
 
   return (
     <>
       <Container>
-        {(cat||filters||sort)
+        {(cat || (JSON.stringify(filters)!=(JSON.stringify({}))&&(filters)) || sort || query1)
           ? filterProducts.map((item) => <Product item={item} key={item.id} />)
           : products.map((item) => <Product item={item} key={item.id} />)}
       </Container>
-      <Button onClick={handlePrev}>Prev</Button>
-      <Button onClick={handleNext}>Next</Button>
+      <Button disabled={page===1} onClick={handlePrev}>Prev</Button>
+      <Button disabled={page===((totalProducts+1)/2)} onClick={handleNext}>Next</Button>
     </>
   );
 };

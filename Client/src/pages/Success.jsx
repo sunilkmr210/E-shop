@@ -8,6 +8,7 @@ export default function Success() {
 
   const location = useLocation();
   console.log(location);
+  //if you want to access state then this component should child component of the component which passed the state
   const data = location.state.stripeData;
   const cart = location.state.cart;
   const currentUser = useSelector((state) => state.user.currentUser);

@@ -17,6 +17,9 @@ import {
 } from "react-router-dom";
 import Success from './pages/Success';
 import Orders from './pages/Orders';
+import Order from './pages/Order';
+import User from './pages/User';
+import Wishlist from './pages/Wishlist';
 
 
 function App() {
@@ -28,13 +31,14 @@ function App() {
           <Route exact path="/" element={<Home />}></Route>
           <Route exact path="/products/:category?" element={<ProductList />}></Route>
           <Route exact path="/product/:id" element={<Product />}></Route>
-          <Route exact path="/cart" element={<Cart />}>
-          </Route>
+          <Route exact path="/cart" element={<Cart />}></Route>
           <Route exact path="/register" element={<Register />}></Route>
           <Route exact path="/login" element={<Login />}></Route>
           <Route exact path="cart/success" element={<Success />}></Route>
           <Route exact path="/orders" element={<Orders />}></Route>
-
+          <Route exact path="/orders/order" element={<Order/>}></Route>
+          <Route exact path="/user" element={<User/>}></Route>
+          <Route exact path="/wishlist" element={<Wishlist/>}></Route>
         </Routes>
       </Router>
     </div>

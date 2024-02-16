@@ -13,6 +13,7 @@ import {
     REGISTER,
 } from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
+import {thunk} from 'redux-thunk';
 
 const persistConfig = {
     key: 'root',
@@ -31,7 +32,7 @@ export const store = configureStore({
             serializableCheck: {
                 ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
             },
-        }),
+        }).concat(thunk),
 });
 
 export let persistor = persistStore(store);

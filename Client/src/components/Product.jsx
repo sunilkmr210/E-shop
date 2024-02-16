@@ -1,12 +1,15 @@
 import {
-    FavoriteBorderOutlined,
-    SearchOutlined,
-    ShoppingCartOutlined,
-  } from "@material-ui/icons";
-  import styled from "styled-components";
-  import {Link} from 'react-router-dom';
-  
-  const Info = styled.div`
+  FavoriteBorderOutlined,
+  SearchOutlined,
+  ShoppingCartOutlined,
+} from "@material-ui/icons";
+import styled from "styled-components";
+import { Link, useNavigate } from 'react-router-dom';
+import { userRequest } from "../requestMethods";
+import { useDispatch, useSelector } from "react-redux";
+import { update } from "../redux/userRedux";
+
+const Info = styled.div`
     opacity: 0;
     width: 100%;
     height: 100%;
@@ -21,8 +24,8 @@ import {
     transition: all 0.5s ease;
     cursor: pointer;
   `;
-  
-  const Container = styled.div`
+
+const Container = styled.div`
     flex: 1;
     margin: 5px;
     min-width: 280px;
@@ -37,21 +40,21 @@ import {
       opacity: 1;
     }
   `;
-  
-  const Circle = styled.div`
+
+const Circle = styled.div`
     width: 200px;
     height: 200px;
     border-radius: 50%;
     background-color: white;
     position: absolute;
   `;
-  
-  const Image = styled.img`
+
+const Image = styled.img`
     height: 75%;
     z-index: 2;
   `;
-  
-  const Icon = styled.div`
+
+const Icon = styled.div`
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -66,28 +69,53 @@ import {
       transform: scale(1.1);
     }
   `;
-  
-  const Product = ({ item }) => {
-    return (
-      <Container>
-        <Circle />
-        <Image src={item.img} />
-        <Info>
-          <Icon>
+
+const Product = ({ item }) => {
+
+  const user = useSelector(state => state.user.currentUser);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleClick = (item) => {
+    if (!user) {
+      navigate('/login');
+    }
+    else {
+      const inilist = user.wishlist;
+      const updatelist = async () => {
+        try {
+          const res = await userRequest.put(`/users/${user._id}`, {
+            wishlist: [...inilist, item],
+          });
+          dispatch(update({ ...res.data, accessToken: user.accessToken }));
+          console.log({ ...res.data, accessToken: user.accessToken });
+        } catch (err) {
+          console.log(err);
+        }
+      }
+      updatelist();
+    }
+  }
+
+  return (
+    <Container>
+      <Circle />
+      <Image src={item.img} />
+      <Info>
+        {/* <Icon>
             <ShoppingCartOutlined />
-          </Icon>
-          <Icon>
-            <Link to={`/product/${item._id}`}>
+          </Icon> */}
+        <Icon>
+          <Link to={`/product/${item._id}`}>
             <SearchOutlined />
-            </Link>
-          </Icon>
-          <Icon>
-            <FavoriteBorderOutlined />
-          </Icon>
-        </Info>
-      </Container>
-    );
-  };
-  
-  export default Product;
-  
+          </Link>
+        </Icon>
+        <Icon onClick={() => handleClick(item)}>
+          <FavoriteBorderOutlined />
+        </Icon>
+      </Info>
+    </Container>
+  );
+};
+
+export default Product;

@@ -5,7 +5,7 @@ import { Navigate } from "react-router-dom";
 export const login = async (dispatch, user)=>{
     dispatch(loginStart());
     try{
-        const res = await publicRequest.post('/auth/login', user)
+        const res = await publicRequest.post('/auth/login', user);
         dispatch(loginSuccess(res.data));
         <Navigate replace to='/'></Navigate>
     }catch(err){

@@ -4,11 +4,10 @@ import Announcement from "../components/Announcement";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import { useState, useEffect } from "react";
-import axios from "axios";
 import StripeCheckout from 'react-stripe-checkout';
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { userRequest } from "../requestMethods";
+import { publicRequest, userRequest } from "../requestMethods";
 import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { replaceCart } from "../redux/cartRedux";
@@ -161,35 +160,96 @@ const Cart = () => {
 
   const cart = useSelector(state => state.cart);
   const user1 = useSelector(state => state.user.currentUser);
+  // console.log(user1);
 
-  const [userCart, setUserCart] = useState({});
+  const [userCart, setUserCart] = useState([]);
   const dispatch = useDispatch();
 
+  //fetching user specific cart
   useEffect(() => {
-    // console.log(user1);
+    console.log(user1);
     if (user1) {
       const getCart = async () => {
         try {
-          const res = await axios.userRequest(`/find/${user1._id}`);
+          const res = await userRequest.get(`carts/find/${user1._id}`);
           setUserCart(res.data);
-        } catch { };
+          // console.log(res.data);
+
+        } catch (err) {
+          console.log(err);
+        };
       }
       getCart();
-      dispatch(replaceCart(userCart));
+
     }
   }, [user1]);
 
   useEffect(() => {
-    if (user1) {
-      const updateCart = async () => {
-        try {
-          const res = await axios.userRequest(`/${user1._id}`, { products: cart.products });
-        } catch { };
-      }
-      updateCart();
+    if (userCart && JSON.stringify(userCart) !== JSON.stringify([])) {
+      dispatch(replaceCart({ products: userCart.products, quantity: userCart.quantity, total: userCart.total }));
+      // console.log("nothello");
     }
+    else {
+      dispatch(replaceCart({ products: [], quantity: 0, total: 0 }));
+      // console.log("hello");
+    }
+  }, [userCart]);
 
-  }, [cart]);
+  //updating cart
+  // useEffect(() => {
+  //   if (user1) {
+  //     const updateCart = async () => {
+  //       try {
+  //         const res = await userRequest.put(`carts/${user1._id}`, { products: cart.products });
+  //         console.log("hello");
+  //       } catch(err) {
+  //         console.log(err);
+  //        };
+  //     }
+  //     updateCart();
+  //   }
+
+  // }, [cart]);
+  
+  //decreasing or increasing quantity of a particular product in cart
+  //concept of shallow copy using destructuring operator
+  //how to use it for deep copy
+  //only applies to objects
+
+  const handleChange = (product, temp)=>{
+    let tempProduct = product;
+    let tempTotal = cart.total;
+    let tempQ = cart.quantity;
+    
+    let flag = true;
+    if(temp==="add"){
+      tempProduct = {...product, quantity: product.quantity+1};
+      tempTotal+=product.price;
+    } 
+    if(temp==="remove"){
+      if(product.quantity>1) {
+        tempProduct = {...product, quantity: product.quantity-1};
+        tempTotal-=product.price;
+
+      }
+      else{
+        flag = false;
+        tempTotal-=product.price;
+        tempQ-=1;
+      }
+    }
+    
+    const tempProducts = [...cart.products];
+    const index = tempProducts.indexOf(product);
+    if(flag) tempProducts[index] = tempProduct;
+    else tempProducts.splice(index, 1);
+    
+    const changeCart = async ()=>{
+      const res = await userRequest.put(`carts/${user1._id}`, {products: tempProducts, quantity: tempQ, total: tempTotal});
+      setUserCart(res.data);
+    }
+    changeCart();
+  }
 
 
   const [stripeToken, setStripeToken] = useState(null);
@@ -199,22 +259,26 @@ const Cart = () => {
     setStripeToken(token);
   }
 
+
+  //payment
   useEffect(() => {
     const makeRequest = async () => {
       try {
         console.log(stripeToken);
-        const res = await axios.post(
-          "http://localhost:5000/api/checkout/payment",
+        const res = await publicRequest.post(
+          "/checkout/payment",
           {
             tokenId: stripeToken.id,
             amount: cart.total * 100,
           }
         );
-        navigate("/cart/success", 
-        {state: {
-          stripeData: stripeToken.card,
-          cart: cart
-        }}
+        navigate("/cart/success",
+          {
+            state: {
+              stripeData: stripeToken.card,
+              cart: cart
+            }
+          }
         );
         console.log(res.data);
       } catch (err) {
@@ -235,13 +299,13 @@ const Cart = () => {
             <TopButton>CONTINUE SHOPPING</TopButton>
           </Link>
           <TopTexts>
-            <TopText>Shopping Bag(2)</TopText>
+            <TopText>Shopping Bag({userCart.quantity})</TopText>
             <TopText>Your Wishlist (0)</TopText>
           </TopTexts>
         </Top>
         <Bottom>
           <Info>
-            {cart.products.map(product => (
+            {userCart && cart.products.map(product => (
               <Product>
                 <ProductDetail>
                   <Image src={product.img} />
@@ -260,9 +324,9 @@ const Cart = () => {
                 </ProductDetail>
                 <PriceDetail>
                   <ProductAmountContainer>
-                    <Add />
+                    <Add onClick={()=>handleChange(product, "add")}/>
                     <ProductAmount>{product.quantity}</ProductAmount>
-                    <Remove />
+                    <Remove onClick={()=>handleChange(product, "remove")}/>
                   </ProductAmountContainer>
                   <ProductPrice>
                     $ {product.price * product.quantity}

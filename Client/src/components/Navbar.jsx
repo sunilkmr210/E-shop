@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { logout } from "../redux/userRedux";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Container = styled.div`
   height: 50px;
@@ -29,19 +30,26 @@ const Left = styled.div`
   align-items: center;
 `;
 
+
 const Language = styled.span`
   font-size: 14px;
   cursor: pointer;
-`;
+  `;
 
 const SearchContainer = styled.div`
   border: 0.5px solid lightgray;
   display: flex;
   align-items: center;
   margin-left: 25px;
+  /* margin-right: 25px; */
   padding: 5px;
-`;
+  `;
 
+const AllProducts = styled.div`
+    margin-left: 500 px;
+    padding: 5px;
+    font-size: 17px;
+  `
 const Input = styled.input`
   border: none;
   `;
@@ -72,11 +80,12 @@ const Navbar = () => {
   // const total = useSelector(state=>state.cart.total);
   const quantity = useSelector(state => state.cart.quantity);
   // console.log(hello);
-  console.log(quantity);
+  // console.log(quantity);
   // console.log(total);
 
   const LoginUser = useSelector(state=>state.user.currentUser);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleClick = ()=>{
     dispatch(logout());
@@ -86,10 +95,18 @@ const Navbar = () => {
     localStorage.setItem('persist:root', newPersistedState);
   }
 
-  const [query, setQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleChange = (e)=>{
-    setQuery(e.target.value);
+    setSearchQuery(e.target.value);
+  }
+
+  const handleSearch = ()=>{
+    navigate("/products", {
+      state: {
+        searchQuery,
+      }
+    })
   }
 
   return (
@@ -98,9 +115,12 @@ const Navbar = () => {
         <Left>
           <Language>EN</Language>
           <SearchContainer>
-            <Input placeholder="Search" value={query} onChange={handleChange}/>
-            <Search style={{ color: "gray", fontSize: 16 }} />
+            <Input placeholder="Search" value={searchQuery} onChange={handleChange}/>
+            <Search onClick={handleSearch} style={{ color: "gray", fontSize: 16 }} />
           </SearchContainer>
+          <Link to="/products" style={{textDecoration: 'none', color: 'inherit'}}>
+          <AllProducts style={{marginLeft: '25px'}}>Products</AllProducts>
+          </Link>
         </Left>
         <Center>
           <Logo>E-SHOP</Logo>
@@ -111,6 +131,9 @@ const Navbar = () => {
           </Link>}
           {!LoginUser&&<Link to="/login" style={{textDecoration: 'none', color: 'inherit'}}>
             <MenuItem>SIGN IN</MenuItem>
+          </Link>}
+          {LoginUser&&<Link to="/orders" style={{textDecoration: 'none', color: 'inherit'}}>
+            <MenuItem>ORDERS</MenuItem>
           </Link>}
           {LoginUser&&<MenuItem onClick={handleClick}>SIGN OUT</MenuItem>}
           <Link to="/cart">

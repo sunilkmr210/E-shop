@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import styled from 'styled-components';
 import { userRequest } from '../requestMethods'
 import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom';
 
 const Container = styled.div`
   padding: 20px;
@@ -42,6 +43,7 @@ export default function Orders() {
     const userId = user1._id;
 
     const [orders, setOrders] = useState([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const getOrders = async () => {
@@ -55,12 +57,19 @@ export default function Orders() {
         getOrders();
     });
 
+    const handleClick = (item)=>{
+        navigate('/orders/order', {
+            state : {
+                order: item
+            }
+        })
+    }
 
     return (
         <div>
             <Container>
                 {orders.map((item) => 
-                <Order>
+                <Order onClick={()=>handleClick(item)}>
                     <Circle>
                         <Image src={item.products[0].img}>
                         </Image>

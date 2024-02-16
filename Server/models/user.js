@@ -9,6 +9,9 @@ const userSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
+        name: {type: String},
+        mobile: {type: Number, unique: true},
+        wishlist: {type: Array}
     },
     { timestamps: true }
 );

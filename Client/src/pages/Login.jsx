@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import styled from "styled-components";
 import { login } from "../redux/apiCalls";
 import { useDispatch, useSelector } from "react-redux";
