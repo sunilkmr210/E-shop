@@ -14,6 +14,10 @@ Features of application
    - All products are listed with the application of pagination done using prev and next, which allows to only 
      fetch limited products at one time as server side pagination is implemented.
    - Each product is with 2 options explore product and add to wishlist.
+
+     <img src="https://github.com/sunilkmr210/E-shop/assets/87411181/a90b03f4-583b-40da-b7ec-7cf003ae78b1" style="width:850px; height:400px;">
+
+    
 4. Footer
     - After login my account option allow users to edit their account details.
     - User wishlist can be checked here.
