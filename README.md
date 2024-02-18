@@ -26,6 +26,6 @@ Features of application
     - Cart added products are displayed where user have option to change thier quantity.
     - Stripe payment is done using checkout now and filling the details which on completion redirect to orders.
 
-      <img src="https://github.com/sunilkmr210/E-shop/assets/87411181/3af2ba3a-2db9-45b4-9338-1523312527e3" alt="alt text" style="width:700px; height:400px;">
+      <img src="https://github.com/sunilkmr210/E-shop/assets/87411181/3af2ba3a-2db9-45b4-9338-1523312527e3" alt="alt text" style="width:1000px; height:500px;">
 
 
