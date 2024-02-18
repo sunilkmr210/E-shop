@@ -1,4 +1,4 @@
-The url for web application is apexedd.com
+The url for web application is www.apexedd.com
 
 Features of application
 1. Navbar
