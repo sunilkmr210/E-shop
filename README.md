@@ -21,6 +21,10 @@ Features of application
     - Redis is implemented for optimization of product fetching.
     - Product is displayed with description and options to choose color, size, quantity and add to cart which 
       is managed using redux thunk.
+
+      <img src="https://github.com/sunilkmr210/E-shop/assets/87411181/153e032c-2483-4c92-97f1-1e1147ede6c3" style="width:850px; height:400px;">
+
+      
 5. Cart
     - Cart redux is used as there are some states of cart which are used in different components of app.
     - Cart added products are displayed where user have option to change thier quantity.
